@@ -37,6 +37,18 @@ export const deleteProduct = async(req, res) => {
   return res.json({message: 'product deleted'})
 };
 
-export const updateProduct = (req, res) => {
-  res.send("update product");
+export const updateProduct = async(req, res) => {
+  const pool = await getConnection()
+  const result = await pool.request()
+  .input('id', sql.Int , req.params.id)
+  .input('name', sql.VarChar, req.body.name)
+  .input('description', sql.Text, req.body.description)
+  .input('quantity', sql.Int, req.body.quantity)
+  .input('price', sql.Decimal, req.body.price)
+  .query('UPDATE products SET name = @name, description = @description, quantity = @quantity, price = @price WHERE id = @id')
+  if (result.rowsAffected[0] === 0) {
+    return res.status(404).json({message: 'product not found'})
+  }
+  return res.json({ id:req.params.id ,name: req.body.name, description: req.body.description, quantity: req.body.quantity, price: req.body.price});
+
 };
